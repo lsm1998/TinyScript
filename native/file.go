@@ -1,6 +1,7 @@
 package native
 
 import (
+	"io/fs"
 	"os"
 	"reflect"
 )
@@ -13,8 +14,18 @@ func (*nativeFile) ReadFile(filename string) (string, error) {
 	return string(content), err
 }
 
-func (*nativeFile) WriteFile(filename string, content string, mode int32) error {
-	return os.WriteFile(filename, []byte(content), os.FileMode(mode))
+func (n *nativeFile) WriteFile(filename string, content string, mode string) error {
+	flag := os.O_CREATE
+	if mode == "append" {
+		flag |= os.O_APPEND
+	}
+	file, err := os.OpenFile(filename, flag, fs.ModePerm)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	_, err = file.WriteString(content)
+	return err
 }
 
 func init() {

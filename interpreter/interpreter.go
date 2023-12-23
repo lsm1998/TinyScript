@@ -286,38 +286,46 @@ func constructInstance(c *valuer.ClassValue, arguments []ast.Expr) *valuer.Insta
 	return instance
 }
 
+func callNativeFunc(function *valuer.Function, arguments []ast.Expr) valuer.Valuer {
+	var values = make([]reflect.Value, 0, len(arguments))
+	for _, v := range arguments {
+		switch v.(type) {
+		case *ast.Literal:
+			if v.(*ast.Literal).Token == token.String {
+				values = append(values, reflect.ValueOf(v.(*ast.Literal).Value))
+				continue
+			} else if v.(*ast.Literal).Token == token.Number {
+				// 暂不支持浮点类型
+				val, err := strconv.ParseInt(v.(*ast.Literal).Value, 10, 32)
+				if err != nil {
+					errors.Error(token.Function, "Invalid number.")
+				}
+				values = append(values, reflect.ValueOf(val))
+			}
+		}
+	}
+	result := function.NativeFunc.Call(values)
+	if len(result) == 0 {
+		return Nil
+	} else if function.IsErr && result[len(result)-1].Interface() != nil { // native函数最后的返回值为error
+		errors.Error(token.Function, result[len(result)-1].Interface().(error).Error())
+	} else {
+		if result[0].IsNil() {
+			return Nil
+		} else if result[0].CanInt() {
+			return &valuer.Number{Value: float64(result[0].Int())}
+		} else if result[0].CanFloat() {
+			return &valuer.Number{Value: result[0].Float()}
+		} else {
+			return &valuer.String{Value: result[0].Interface().(string)}
+		}
+	}
+	return Nil
+}
+
 func callFunction(function *valuer.Function, arguments []ast.Expr) valuer.Valuer {
 	if function.NativeFunc.IsValid() { // 是否是内置函数
-		var values = make([]reflect.Value, 0, len(arguments))
-		for _, v := range arguments {
-			switch v.(type) {
-			case *ast.Literal:
-				if v.(*ast.Literal).Token == token.String {
-					values = append(values, reflect.ValueOf(v.(*ast.Literal).Value))
-					continue
-				} else if v.(*ast.Literal).Token == token.Number {
-					val, err := strconv.ParseFloat(v.(*ast.Literal).Value, 64)
-					if err != nil {
-						errors.Error(token.Function, "Invalid number.")
-					}
-					values = append(values, reflect.ValueOf(val))
-				}
-			}
-		}
-		result := function.NativeFunc.Call(values)
-		if len(result) == 0 {
-			return Nil
-		} else if function.IsErr && result[len(result)-1].Interface() != nil { // native函数最后的返回值为error
-			errors.Error(token.Function, result[len(result)-1].Interface().(error).Error())
-		} else {
-			if result[0].CanInt() {
-				return &valuer.Number{Value: float64(result[0].Int())}
-			} else if result[0].CanFloat() {
-				return &valuer.Number{Value: result[0].Float()}
-			} else {
-				return &valuer.String{Value: result[0].Interface().(string)}
-			}
-		}
+		return callNativeFunc(function, arguments)
 	}
 	environment := function.Closure
 	environment = valuer.NewEnclosing(function.Closure)

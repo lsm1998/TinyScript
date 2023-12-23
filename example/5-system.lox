@@ -2,6 +2,8 @@ import time;
 import file;
 import os;
 
+file.WriteFile("a.txt", "hello world", "append");
+
 print time.Timestamp();
 print os.Pwd();
 print file.ReadFile("a.txt");
