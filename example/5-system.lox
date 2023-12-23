@@ -1,0 +1,8 @@
+import time;
+import file;
+import os;
+
+print time.Timestamp();
+print os.Pwd();
+print file.ReadFile("a.txt");
+print "当前系统核心数：" + os.NumCPU();

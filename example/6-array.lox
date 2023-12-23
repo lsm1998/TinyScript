@@ -1,0 +1,8 @@
+let arr = [1,2,3,4,"hello"]
+
+arr.forEach((item,index)=>{
+    print '下标=' + index
+    print '元素=' + item
+})
+
+print '数组长度'+arr.length
