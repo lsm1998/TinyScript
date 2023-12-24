@@ -18,6 +18,7 @@ github地址：https://github.com/nanmu42/bluelox
 ## 扩展点
 
 - 增加了let关键字，用于声明变量
+- 增加了一些注释，方便学习
 - 增加了系统内置函数，通过import关键字引入
-- 修改了函数的声明方式，将fn关键字改为了function（和JavaScript一致）
+- 支持function关键字，和fn关键字作用一致（和JavaScript一致）
 - 支持数组（未完成）

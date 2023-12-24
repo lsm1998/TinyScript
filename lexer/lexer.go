@@ -194,6 +194,12 @@ func (l *Lexer) NextToken() (tok token.Token, literal string) {
 	case ')':
 		tok = token.RightParen
 		literal = ")"
+	case '[':
+		tok = token.LeftBracket
+		literal = "["
+	case ']':
+		tok = token.RightBracket
+		literal = "]"
 	case '{':
 		tok = token.LeftBrace
 		literal = "{"

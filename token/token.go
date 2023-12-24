@@ -11,17 +11,19 @@ const (
 
 	// single-character
 
-	LeftParen  // (
-	RightParen // )
-	LeftBrace  // {
-	RightBrace // }
-	Comma      // ,
-	Dot        // .
-	Minus      // -
-	Plus       // +
-	Semicolon  // ;
-	Slash      // /
-	Star       // *
+	LeftParen    // (
+	RightParen   // )
+	LeftBracket  // [
+	RightBracket // ]
+	LeftBrace    // {
+	RightBrace   // }
+	Comma        // ,
+	Dot          // .
+	Minus        // -
+	Plus         // +
+	Semicolon    // ;
+	Slash        // /
+	Star         // *
 
 	Bang         // !
 	BangEqual    // !=
@@ -66,6 +68,8 @@ var tokens = [...]string{
 	EOF:          "EOF",
 	LeftParen:    "(",
 	RightParen:   ")",
+	LeftBracket:  "[",
+	RightBracket: "]",
 	LeftBrace:    "{",
 	RightBrace:   "}",
 	Comma:        ",",

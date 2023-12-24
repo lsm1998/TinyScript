@@ -1,6 +1,7 @@
 package ast
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
 
@@ -78,68 +79,85 @@ func (lit *Literal) String() string {
 		return "false"
 	case token.Number, token.String:
 		return lit.Value
+	default:
+		panic("unhandled default case")
 	}
-	panic("unknown Literal.")
 }
 
 type (
+	// AssignExpr 赋值表达式
 	AssignExpr struct {
 		Left  *VariableExpr
 		Value Expr
 	}
+	// BinaryExpr 二元运算符表达式
 	BinaryExpr struct {
 		Left     Expr
 		Operator token.Token
 		Right    Expr
 	}
+	// CallExpr 函数调用表达式
 	CallExpr struct {
 		Callee    Expr
 		Arguments []Expr
 	}
+	// GetExpr 对象的获取表达式
 	GetExpr struct {
 		Object Expr
 		Name   string
 	}
+	// GroupingExpr 括号表达式
 	GroupingExpr struct {
 		Expression Expr
 	}
+	// LogicalExpr
 	LogicalExpr struct {
 		Left     Expr
 		Operator token.Token
 		Right    Expr
 	}
+	// SetExpr 对象的设置字段表达式
 	SetExpr struct {
 		Object Expr
 		Name   string
 		Value  Expr
 	}
+	// SuperExpr 暂未实现
 	SuperExpr struct {
 		// Method  Ident
 		Keyword token.Token
 		Method  token.Token
 	}
+	// ThisExpr this
 	ThisExpr  struct{}
 	UnaryExpr struct {
 		Operator token.Token
 		Right    Expr
 	}
+	// VariableExpr 定义变量表达式
 	VariableExpr struct {
 		Name     string
 		Distance int // -1 represents global variable.
 	}
+	// ArrayLiteralExpr 数组字面量
+	ArrayLiteralExpr struct {
+		Token    token.Token
+		Elements []Expr
+	}
 )
 
-func (*AssignExpr) expr()   {}
-func (*BinaryExpr) expr()   {}
-func (*CallExpr) expr()     {}
-func (*GetExpr) expr()      {}
-func (*GroupingExpr) expr() {}
-func (*LogicalExpr) expr()  {}
-func (*SetExpr) expr()      {}
-func (*SuperExpr) expr()    {}
-func (*ThisExpr) expr()     {}
-func (*UnaryExpr) expr()    {}
-func (*VariableExpr) expr() {}
+func (*AssignExpr) expr()       {}
+func (*BinaryExpr) expr()       {}
+func (*CallExpr) expr()         {}
+func (*GetExpr) expr()          {}
+func (*GroupingExpr) expr()     {}
+func (*LogicalExpr) expr()      {}
+func (*SetExpr) expr()          {}
+func (*SuperExpr) expr()        {}
+func (*ThisExpr) expr()         {}
+func (*UnaryExpr) expr()        {}
+func (*VariableExpr) expr()     {}
+func (*ArrayLiteralExpr) expr() {}
 
 func (e *AssignExpr) String() string {
 	return fmt.Sprintf("%s = %s", e.Left, e.Value)
@@ -187,6 +205,18 @@ func (e *UnaryExpr) String() string {
 
 func (e *VariableExpr) String() string {
 	return e.Name
+}
+
+func (e *ArrayLiteralExpr) String() string {
+	var arr = make([]string, 0, len(e.Elements))
+	for _, v := range e.Elements {
+		arr = append(arr, v.String())
+	}
+	buff := bytes.Buffer{}
+	buff.WriteString("[")
+	buff.WriteString(strings.Join(arr, ","))
+	buff.WriteString("]")
+	return buff.String()
 }
 
 type (
