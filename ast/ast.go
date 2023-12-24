@@ -31,19 +31,20 @@ func (*Ident) node() {}
 
 func (*Literal) node() {}
 
-func (*AssignExpr) node()       {}
-func (*BinaryExpr) node()       {}
-func (*CallExpr) node()         {}
-func (*GetExpr) node()          {}
-func (*GroupingExpr) node()     {}
-func (*LogicalExpr) node()      {}
-func (*SetExpr) node()          {}
-func (*SuperExpr) node()        {}
-func (*ThisExpr) node()         {}
-func (*UnaryExpr) node()        {}
-func (*VariableExpr) node()     {}
-func (*ArrayLiteralExpr) node() {}
-func (*IndexExpr) node()        {}
+func (*AssignExpr) node()        {}
+func (*BinaryExpr) node()        {}
+func (*CallExpr) node()          {}
+func (*GetExpr) node()           {}
+func (*GroupingExpr) node()      {}
+func (*LogicalExpr) node()       {}
+func (*SetExpr) node()           {}
+func (*SuperExpr) node()         {}
+func (*ThisExpr) node()          {}
+func (*UnaryExpr) node()         {}
+func (*VariableExpr) node()      {}
+func (*ArrayLiteralExpr) node()  {}
+func (*IndexLiteralExpr) node()  {}
+func (*IndexVariableExpr) node() {}
 
 func (*BlockStmt) node()    {}
 func (*ClassStmt) node()    {}
@@ -146,26 +147,33 @@ type (
 		Elements []Expr
 		Distance int // -1 represents global variable.
 	}
-	// IndexExpr 数组索引表达式
-	IndexExpr struct {
+	// IndexLiteralExpr 数组索引表达式（通过字面量获取）
+	IndexLiteralExpr struct {
+		Left  Expr
+		Index Expr
+	}
+	// IndexVariableExpr 数组索引赋值表达式（通过变量获取）
+	IndexVariableExpr struct {
+		Name  string
 		Left  Expr
 		Index Expr
 	}
 )
 
-func (*AssignExpr) expr()       {}
-func (*BinaryExpr) expr()       {}
-func (*CallExpr) expr()         {}
-func (*GetExpr) expr()          {}
-func (*GroupingExpr) expr()     {}
-func (*LogicalExpr) expr()      {}
-func (*SetExpr) expr()          {}
-func (*SuperExpr) expr()        {}
-func (*ThisExpr) expr()         {}
-func (*UnaryExpr) expr()        {}
-func (*VariableExpr) expr()     {}
-func (*ArrayLiteralExpr) expr() {}
-func (*IndexExpr) expr()        {}
+func (*AssignExpr) expr()        {}
+func (*BinaryExpr) expr()        {}
+func (*CallExpr) expr()          {}
+func (*GetExpr) expr()           {}
+func (*GroupingExpr) expr()      {}
+func (*LogicalExpr) expr()       {}
+func (*SetExpr) expr()           {}
+func (*SuperExpr) expr()         {}
+func (*ThisExpr) expr()          {}
+func (*UnaryExpr) expr()         {}
+func (*VariableExpr) expr()      {}
+func (*ArrayLiteralExpr) expr()  {}
+func (*IndexLiteralExpr) expr()  {}
+func (*IndexVariableExpr) expr() {}
 
 func (e *AssignExpr) String() string {
 	return fmt.Sprintf("%s = %s", e.Left, e.Value)
@@ -227,8 +235,12 @@ func (e *ArrayLiteralExpr) String() string {
 	return buff.String()
 }
 
-func (e *IndexExpr) String() string {
+func (e *IndexLiteralExpr) String() string {
 	return fmt.Sprintf("%s[%s]", e.Left.String(), e.Index.String())
+}
+
+func (e *IndexVariableExpr) String() string {
+	return fmt.Sprintf("%s[%s]", e.Name, e.Index.String())
 }
 
 type (

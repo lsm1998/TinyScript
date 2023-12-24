@@ -344,9 +344,19 @@ func (p *Parser) parseAssignment() ast.Expr {
 	} else if p.match(token.LeftBracket) {
 		index := p.parseExpression()
 		p.expect(token.RightBracket, "Expect ']' after index.")
-		return &ast.IndexExpr{
-			Left:  expr,
-			Index: index,
+
+		switch expr.(type) {
+		case *ast.VariableExpr:
+			return &ast.IndexVariableExpr{
+				Name:  index.String(),
+				Left:  expr,
+				Index: index,
+			}
+		case *ast.Literal:
+			return &ast.IndexLiteralExpr{
+				Left:  expr,
+				Index: index,
+			}
 		}
 	}
 	return expr

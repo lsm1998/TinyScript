@@ -122,12 +122,22 @@ func Eval(node ast.Node) valuer.Valuer {
 		return nil
 	case *ast.ArrayLiteralExpr:
 		return evalArrayLiteralExpr(n)
-	case *ast.IndexExpr:
-		return evalIndexExpr(n)
+	case *ast.IndexLiteralExpr:
+		return evalIndexLiteralExpr(n)
+	case *ast.IndexVariableExpr:
+		return evalIndexVariableExpr(n)
 	}
 }
 
-func evalIndexExpr(n *ast.IndexExpr) valuer.Valuer {
+func evalIndexVariableExpr(n *ast.IndexVariableExpr) valuer.Valuer {
+	if v, ok := env.Get(n.Name); ok {
+		return v
+	}
+	errors.Error(token.Identifier, fmt.Sprintf("Undefined variable %s.", n.Name))
+	return nil
+}
+
+func evalIndexLiteralExpr(n *ast.IndexLiteralExpr) valuer.Valuer {
 	variableExpr, ok := n.Left.(*ast.VariableExpr)
 	if !ok {
 		panic("Only variable can be indexed.")
