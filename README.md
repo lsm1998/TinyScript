@@ -13,12 +13,10 @@ Self made script language
 
 源文地址：https://www.poetries.cn/crafting/welcome/the-lox-language.html
 
-github地址：https://github.com/nanmu42/bluelox
-
 ## 扩展点
 
 - 增加了let关键字，用于声明变量
 - 增加了一些注释，方便学习
 - 增加了系统内置函数，通过import关键字引入
 - 支持function关键字，和fn关键字作用一致（和JavaScript一致）
-- 支持数组（未完成）
+- 支持数组

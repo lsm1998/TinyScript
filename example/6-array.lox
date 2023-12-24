@@ -1,8 +1,7 @@
-let arr = [1,2,3,4,"hello"]
+let arr = [1,2,3,4,"hello"];
 
-arr.forEach((item,index)=>{
-    print '下标=' + index
-    print '元素=' + item
-})
+print arr[0];
+print arr[2];
 
-print '数组长度'+arr.length
+print arr;
+print "数组长度"+arr.length;

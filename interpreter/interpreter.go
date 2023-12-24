@@ -389,15 +389,25 @@ func callFunction(function *valuer.Function, arguments []ast.Expr) valuer.Valuer
 
 func evalGetExpr(expr *ast.GetExpr) valuer.Valuer {
 	object := Eval(expr.Object)
-	instance, ok := object.(*valuer.Instance)
-	if !ok {
-		errors.Error(token.Identifier, "Only instances have properties.")
-		return nil
+
+	switch object.(type) {
+	case *valuer.Instance:
+		instance, _ := object.(*valuer.Instance)
+		if v, ok := instance.Get(expr.Name); ok {
+			return v
+		}
+		errors.Error(token.Identifier, fmt.Sprintf("Undefined propterty %s.", expr.Name))
+	case *valuer.Array: // 为数组添加length属性
+		array, _ := object.(*valuer.Array)
+		switch expr.Name {
+		case "length":
+			return &valuer.Number{Value: float64(len(array.Elements))}
+		default:
+			errors.Error(token.Identifier, fmt.Sprintf("Undefined propterty %s.", expr.Name))
+		}
+	default:
+		errors.Error(token.Identifier, "Only instances or array have properties.")
 	}
-	if v, ok := instance.Get(expr.Name); ok {
-		return v
-	}
-	errors.Error(token.Identifier, fmt.Sprintf("Undefined propterty %s.", expr.Name))
 	return nil
 }
 
