@@ -125,10 +125,7 @@ func resolveLocal(expr ast.Expr, name string) {
 }
 
 func resolveAssignExpr(expr *ast.AssignExpr) {
-	if exist, init := scopes.check(expr.Left.Name); exist && !init {
-		errors.Error(token.Identifier, "Cannot read local variable in its own initializer.")
-		return
-	}
+	Resolve(expr.Value)
 	resolveLocal(expr.Left, expr.Left.Name)
 }
 

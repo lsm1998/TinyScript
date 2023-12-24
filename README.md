@@ -20,3 +20,4 @@ Self made script language
 - 增加了系统内置函数，通过import关键字引入
 - 支持function关键字，和fn关键字作用一致（和JavaScript一致）
 - 支持数组
+- 支持自增自减运算符（未完成）
