@@ -31,17 +31,18 @@ func (*Ident) node() {}
 
 func (*Literal) node() {}
 
-func (*AssignExpr) node()   {}
-func (*BinaryExpr) node()   {}
-func (*CallExpr) node()     {}
-func (*GetExpr) node()      {}
-func (*GroupingExpr) node() {}
-func (*LogicalExpr) node()  {}
-func (*SetExpr) node()      {}
-func (*SuperExpr) node()    {}
-func (*ThisExpr) node()     {}
-func (*UnaryExpr) node()    {}
-func (*VariableExpr) node() {}
+func (*AssignExpr) node()       {}
+func (*BinaryExpr) node()       {}
+func (*CallExpr) node()         {}
+func (*GetExpr) node()          {}
+func (*GroupingExpr) node()     {}
+func (*LogicalExpr) node()      {}
+func (*SetExpr) node()          {}
+func (*SuperExpr) node()        {}
+func (*ThisExpr) node()         {}
+func (*UnaryExpr) node()        {}
+func (*VariableExpr) node()     {}
+func (*ArrayLiteralExpr) node() {}
 
 func (*BlockStmt) node()    {}
 func (*ClassStmt) node()    {}

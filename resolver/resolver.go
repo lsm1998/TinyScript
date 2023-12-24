@@ -75,12 +75,16 @@ func Resolve(node ast.Node) {
 	case *ast.ClassStmt:
 		resolveClassStmt(n)
 	case *ast.ImportStmt:
-		resolveImportStmt(n)
+		// do nothing.
+	case *ast.ArrayLiteralExpr:
+		resolveArrayLiteralExpr(n)
 	}
 }
 
-func resolveImportStmt(stmt *ast.ImportStmt) {
-	// TODO
+func resolveArrayLiteralExpr(stmt *ast.ArrayLiteralExpr) {
+	for _, expr := range stmt.Elements {
+		Resolve(expr)
+	}
 }
 
 func resolveVariableExpr(expr *ast.VariableExpr) {

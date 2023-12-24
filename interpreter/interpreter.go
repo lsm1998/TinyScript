@@ -120,7 +120,17 @@ func Eval(node ast.Node) valuer.Valuer {
 	case *ast.ImportStmt:
 		evalImportStmt(n)
 		return nil
+	case *ast.ArrayLiteralExpr:
+		return evalArrayLiteralExpr(n)
 	}
+}
+
+func evalArrayLiteralExpr(expr *ast.ArrayLiteralExpr) valuer.Valuer {
+	var elements = make([]valuer.Valuer, 0, len(expr.Elements))
+	for _, e := range expr.Elements {
+		elements = append(elements, Eval(e))
+	}
+	return &valuer.Array{Elements: elements}
 }
 
 func evalLiteral(lit *ast.Literal) valuer.Valuer {

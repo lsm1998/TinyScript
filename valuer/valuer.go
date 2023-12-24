@@ -29,6 +29,7 @@ const (
 	ReturnType                   // return
 	ClassType                    // class
 	InstanceType                 // instance
+	ArrayType                    // array
 )
 
 func (typ Type) String() string {
@@ -186,4 +187,22 @@ func (i *Instance) Set(key string, v Valuer) {
 		i.Fileds = make(map[string]Valuer)
 	}
 	i.Fileds[key] = v
+}
+
+type Array struct {
+	Elements []Valuer
+}
+
+func (*Array) Type() Type { return ArrayType }
+
+func (a *Array) String() string {
+	str := "["
+	for i, e := range a.Elements {
+		str += e.String()
+		if i != len(a.Elements)-1 {
+			str += ", "
+		}
+	}
+	str += "]"
+	return str
 }
