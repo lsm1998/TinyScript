@@ -43,6 +43,7 @@ func (*ThisExpr) node()         {}
 func (*UnaryExpr) node()        {}
 func (*VariableExpr) node()     {}
 func (*ArrayLiteralExpr) node() {}
+func (*IndexExpr) node()        {}
 
 func (*BlockStmt) node()    {}
 func (*ClassStmt) node()    {}
@@ -140,10 +141,15 @@ type (
 		Name     string
 		Distance int // -1 represents global variable.
 	}
-	// ArrayLiteralExpr 数组字面量
+	// ArrayLiteralExpr 数组字面量表达式
 	ArrayLiteralExpr struct {
-		Token    token.Token
 		Elements []Expr
+		Distance int // -1 represents global variable.
+	}
+	// IndexExpr 数组索引表达式
+	IndexExpr struct {
+		Left  Expr
+		Index Expr
 	}
 )
 
@@ -159,6 +165,7 @@ func (*ThisExpr) expr()         {}
 func (*UnaryExpr) expr()        {}
 func (*VariableExpr) expr()     {}
 func (*ArrayLiteralExpr) expr() {}
+func (*IndexExpr) expr()        {}
 
 func (e *AssignExpr) String() string {
 	return fmt.Sprintf("%s = %s", e.Left, e.Value)
@@ -218,6 +225,10 @@ func (e *ArrayLiteralExpr) String() string {
 	buff.WriteString(strings.Join(arr, ","))
 	buff.WriteString("]")
 	return buff.String()
+}
+
+func (e *IndexExpr) String() string {
+	return fmt.Sprintf("%s[%s]", e.Left.String(), e.Index.String())
 }
 
 type (

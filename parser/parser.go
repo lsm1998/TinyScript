@@ -341,6 +341,13 @@ func (p *Parser) parseAssignment() ast.Expr {
 				Value:  v,
 			}
 		}
+	} else if p.match(token.LeftBracket) {
+		index := p.parseExpression()
+		p.expect(token.RightBracket, "Expect ']' after index.")
+		return &ast.IndexExpr{
+			Left:  expr,
+			Index: index,
+		}
 	}
 	return expr
 }
@@ -502,8 +509,8 @@ func (p *Parser) parsePrimary() (expr ast.Expr) {
 		}
 		skipNext = true
 		expr = &ast.ArrayLiteralExpr{
-			Token:    tok,
 			Elements: elements,
+			Distance: -1,
 		}
 	case token.True, token.False, token.Nil, token.String, token.Number:
 		expr = &ast.Literal{

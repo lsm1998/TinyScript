@@ -78,7 +78,13 @@ func Resolve(node ast.Node) {
 		// do nothing.
 	case *ast.ArrayLiteralExpr:
 		resolveArrayLiteralExpr(n)
+	case *ast.IndexExpr:
+		resolveIndexExpr(n)
 	}
+}
+
+func resolveIndexExpr(n *ast.IndexExpr) {
+	Resolve(n.Left)
 }
 
 func resolveArrayLiteralExpr(stmt *ast.ArrayLiteralExpr) {

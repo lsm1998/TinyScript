@@ -122,7 +122,37 @@ func Eval(node ast.Node) valuer.Valuer {
 		return nil
 	case *ast.ArrayLiteralExpr:
 		return evalArrayLiteralExpr(n)
+	case *ast.IndexExpr:
+		return evalIndexExpr(n)
 	}
+}
+
+func evalIndexExpr(n *ast.IndexExpr) valuer.Valuer {
+	variableExpr, ok := n.Left.(*ast.VariableExpr)
+	if !ok {
+		panic("Only variable can be indexed.")
+	}
+	var v valuer.Valuer
+	if variableExpr.Distance >= 0 {
+		v, ok = env.GetAt(variableExpr.Distance, variableExpr.Name)
+	} else {
+		v, ok = globals.Get(variableExpr.Name)
+	}
+	if !ok {
+		panic("Undefined variable.")
+	}
+	array, ok := v.(*valuer.Array)
+	if !ok {
+		panic("Only array can be indexed.")
+	}
+	index := Eval(n.Index)
+	if index.Type() != valuer.NumberType {
+		panic("Index must be number.")
+	}
+	if int(index.(*valuer.Number).Value) >= len(array.Elements) {
+		panic("Index out of range.")
+	}
+	return array.Elements[int(index.(*valuer.Number).Value)]
 }
 
 func evalArrayLiteralExpr(expr *ast.ArrayLiteralExpr) valuer.Valuer {
