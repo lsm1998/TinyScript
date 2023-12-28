@@ -75,12 +75,28 @@ func Resolve(node ast.Node) {
 	case *ast.ClassStmt:
 		resolveClassStmt(n)
 	case *ast.ImportStmt:
-		resolveImportStmt(n)
+		// do nothing.
+	case *ast.ArrayLiteralExpr:
+		resolveArrayLiteralExpr(n)
+	case *ast.IndexLiteralExpr:
+		resolveIndexExpr(n)
+	case *ast.IndexVariableExpr:
+		resolveIndexVariableExpr(n)
 	}
 }
 
-func resolveImportStmt(stmt *ast.ImportStmt) {
-	// TODO
+func resolveIndexVariableExpr(n *ast.IndexVariableExpr) {
+	resolveLocal(n, n.Name)
+}
+
+func resolveIndexExpr(n *ast.IndexLiteralExpr) {
+	Resolve(n.Left)
+}
+
+func resolveArrayLiteralExpr(stmt *ast.ArrayLiteralExpr) {
+	for _, expr := range stmt.Elements {
+		Resolve(expr)
+	}
 }
 
 func resolveVariableExpr(expr *ast.VariableExpr) {
@@ -115,10 +131,7 @@ func resolveLocal(expr ast.Expr, name string) {
 }
 
 func resolveAssignExpr(expr *ast.AssignExpr) {
-	if exist, init := scopes.check(expr.Left.Name); exist && !init {
-		errors.Error(token.Identifier, "Cannot read local variable in its own initializer.")
-		return
-	}
+	Resolve(expr.Value)
 	resolveLocal(expr.Left, expr.Left.Name)
 }
 

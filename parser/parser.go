@@ -341,6 +341,23 @@ func (p *Parser) parseAssignment() ast.Expr {
 				Value:  v,
 			}
 		}
+	} else if p.match(token.LeftBracket) {
+		index := p.parseExpression()
+		p.expect(token.RightBracket, "Expect ']' after index.")
+
+		switch expr.(type) {
+		case *ast.VariableExpr:
+			return &ast.IndexVariableExpr{
+				Name:  index.String(),
+				Left:  expr,
+				Index: index,
+			}
+		case *ast.Literal:
+			return &ast.IndexLiteralExpr{
+				Left:  expr,
+				Index: index,
+			}
+		}
 	}
 	return expr
 }
@@ -485,9 +502,26 @@ func (p *Parser) finishCall(expr ast.Expr) ast.Expr {
 
 func (p *Parser) parsePrimary() (expr ast.Expr) {
 	tok, lit := p.tok, p.lit
+	var skipNext bool
 	switch tok {
 	default:
 		p.error("Expect expression.")
+	case token.LeftBracket:
+		elements := make([]ast.Expr, 0)
+		p.nextToken()
+		for !p.match(token.RightBracket) {
+			elements = append(elements, p.parseExpression())
+			if p.match(token.RightBracket) {
+				break
+			} else if !p.match(token.Comma) {
+				p.error("Expect ',' or ']' after array element.")
+			}
+		}
+		skipNext = true
+		expr = &ast.ArrayLiteralExpr{
+			Elements: elements,
+			Distance: -1,
+		}
 	case token.True, token.False, token.Nil, token.String, token.Number:
 		expr = &ast.Literal{
 			Token: tok,
@@ -509,7 +543,9 @@ func (p *Parser) parsePrimary() (expr ast.Expr) {
 		}
 		return
 	}
-	p.nextToken()
+	if !skipNext {
+		p.nextToken()
+	}
 	return expr
 }
 
@@ -521,8 +557,9 @@ func (p *Parser) synchronize() {
 			return
 		case token.Class, token.Function, token.Var, token.Let, token.If, token.While, token.Print, token.Return:
 			return
+		default:
+			p.nextToken()
 		}
-		p.nextToken()
 	}
 }
 

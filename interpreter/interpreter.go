@@ -120,7 +120,57 @@ func Eval(node ast.Node) valuer.Valuer {
 	case *ast.ImportStmt:
 		evalImportStmt(n)
 		return nil
+	case *ast.ArrayLiteralExpr:
+		return evalArrayLiteralExpr(n)
+	case *ast.IndexLiteralExpr:
+		return evalIndexLiteralExpr(n)
+	case *ast.IndexVariableExpr:
+		return evalIndexVariableExpr(n)
 	}
+}
+
+func evalIndexVariableExpr(n *ast.IndexVariableExpr) valuer.Valuer {
+	if v, ok := env.Get(n.Name); ok {
+		return v
+	}
+	errors.Error(token.Identifier, fmt.Sprintf("Undefined variable %s.", n.Name))
+	return nil
+}
+
+func evalIndexLiteralExpr(n *ast.IndexLiteralExpr) valuer.Valuer {
+	variableExpr, ok := n.Left.(*ast.VariableExpr)
+	if !ok {
+		panic("Only variable can be indexed.")
+	}
+	var v valuer.Valuer
+	if variableExpr.Distance >= 0 {
+		v, ok = env.GetAt(variableExpr.Distance, variableExpr.Name)
+	} else {
+		v, ok = globals.Get(variableExpr.Name)
+	}
+	if !ok {
+		panic("Undefined variable.")
+	}
+	array, ok := v.(*valuer.Array)
+	if !ok {
+		panic("Only array can be indexed.")
+	}
+	index := Eval(n.Index)
+	if index.Type() != valuer.NumberType {
+		panic("Index must be number.")
+	}
+	if int(index.(*valuer.Number).Value) >= len(array.Elements) {
+		panic("Index out of range.")
+	}
+	return array.Elements[int(index.(*valuer.Number).Value)]
+}
+
+func evalArrayLiteralExpr(expr *ast.ArrayLiteralExpr) valuer.Valuer {
+	var elements = make([]valuer.Valuer, 0, len(expr.Elements))
+	for _, e := range expr.Elements {
+		elements = append(elements, Eval(e))
+	}
+	return &valuer.Array{Elements: elements}
 }
 
 func evalLiteral(lit *ast.Literal) valuer.Valuer {
@@ -349,15 +399,25 @@ func callFunction(function *valuer.Function, arguments []ast.Expr) valuer.Valuer
 
 func evalGetExpr(expr *ast.GetExpr) valuer.Valuer {
 	object := Eval(expr.Object)
-	instance, ok := object.(*valuer.Instance)
-	if !ok {
-		errors.Error(token.Identifier, "Only instances have properties.")
-		return nil
+
+	switch object.(type) {
+	case *valuer.Instance:
+		instance, _ := object.(*valuer.Instance)
+		if v, ok := instance.Get(expr.Name); ok {
+			return v
+		}
+		errors.Error(token.Identifier, fmt.Sprintf("Undefined propterty %s.", expr.Name))
+	case *valuer.Array: // 为数组添加length属性
+		array, _ := object.(*valuer.Array)
+		switch expr.Name {
+		case "length":
+			return &valuer.Number{Value: float64(len(array.Elements))}
+		default:
+			errors.Error(token.Identifier, fmt.Sprintf("Undefined propterty %s.", expr.Name))
+		}
+	default:
+		errors.Error(token.Identifier, "Only instances or array have properties.")
 	}
-	if v, ok := instance.Get(expr.Name); ok {
-		return v
-	}
-	errors.Error(token.Identifier, fmt.Sprintf("Undefined propterty %s.", expr.Name))
 	return nil
 }
 
