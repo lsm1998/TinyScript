@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+	"tiny-script/lox/repl"
 
-	"tiny-script/cmd/lox/repl"
 	"tiny-script/interpreter"
 	"tiny-script/lexer"
 	"tiny-script/parser"
