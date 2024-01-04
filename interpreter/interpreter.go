@@ -360,14 +360,25 @@ func callNativeFunc(function *valuer.Function, arguments []ast.Expr) valuer.Valu
 	} else if function.IsErr && result[len(result)-1].Interface() != nil { // native函数最后的返回值为error
 		errors.Error(token.Function, result[len(result)-1].Interface().(error).Error())
 	} else {
-		if result[0].IsNil() {
-			return Nil
-		} else if result[0].CanInt() {
+		switch result[0].Kind() {
+		case reflect.Bool:
+			return &valuer.Boolean{Value: result[0].Bool()}
+		case reflect.Int:
 			return &valuer.Number{Value: float64(result[0].Int())}
-		} else if result[0].CanFloat() {
+		case reflect.Int64:
+			return &valuer.Number{Value: float64(result[0].Int())}
+		case reflect.Float64:
 			return &valuer.Number{Value: result[0].Float()}
-		} else {
-			return &valuer.String{Value: result[0].Interface().(string)}
+		case reflect.String:
+			return &valuer.String{Value: result[0].String()}
+		case reflect.Float32:
+			return &valuer.Number{Value: result[0].Float()}
+		default:
+			iface := result[0].Interface()
+			if iface == nil {
+				return Nil
+			}
+			return &valuer.String{Value: iface.(string)}
 		}
 	}
 	return Nil
