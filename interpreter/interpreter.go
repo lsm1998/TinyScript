@@ -82,6 +82,8 @@ func Eval(node ast.Node) valuer.Valuer {
 		return evalVariableExpr(n)
 	case *ast.AssignExpr:
 		return evalAssignExpr(n)
+	case *ast.ArrayAssignExpr:
+		return evalArrayAssignExpr(n)
 	case *ast.LogicalExpr:
 		return evalLogicalExpr(n)
 	case *ast.CallExpr:
@@ -127,6 +129,37 @@ func Eval(node ast.Node) valuer.Valuer {
 	case *ast.IndexVariableExpr:
 		return evalIndexVariableExpr(n)
 	}
+}
+
+func evalArrayAssignExpr(n *ast.ArrayAssignExpr) valuer.Valuer {
+	expr := evalVariableExpr(n.Left)
+
+	var index valuer.Valuer
+	switch n.Index.(type) {
+	case *ast.IndexLiteralExpr:
+		index = Eval(n.Index.(*ast.IndexLiteralExpr).Index)
+	case *ast.IndexVariableExpr:
+		t := n.Index.(*ast.IndexVariableExpr)
+		index = evalVariableExpr(t.Index.(*ast.VariableExpr))
+	}
+
+	if index.Type() != valuer.NumberType {
+		panic("Index must be number.")
+	}
+
+	array, ok := expr.(*valuer.Array)
+	if !ok {
+		panic("Only array can be indexed.")
+	}
+
+	indexVal := int(index.(*valuer.Number).Value)
+
+	if indexVal >= len(array.Elements) || indexVal < 0 {
+		panic("Index out of range.")
+	}
+
+	array.Elements[indexVal] = Eval(n.Value)
+	return nil
 }
 
 func evalIndexVariableExpr(n *ast.IndexVariableExpr) valuer.Valuer {

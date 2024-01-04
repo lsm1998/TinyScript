@@ -32,6 +32,7 @@ func (*Ident) node() {}
 func (*Literal) node() {}
 
 func (*AssignExpr) node()        {}
+func (*ArrayAssignExpr) node()   {}
 func (*BinaryExpr) node()        {}
 func (*CallExpr) node()          {}
 func (*GetExpr) node()           {}
@@ -99,6 +100,12 @@ type (
 		Operator token.Token
 		Right    Expr
 	}
+	// ArrayAssignExpr 数组赋值表达式
+	ArrayAssignExpr struct {
+		Left  *VariableExpr
+		Index Expr
+		Value Expr
+	}
 	// CallExpr 函数调用表达式
 	CallExpr struct {
 		Callee    Expr
@@ -161,6 +168,7 @@ type (
 )
 
 func (*AssignExpr) expr()        {}
+func (*ArrayAssignExpr) expr()   {}
 func (*BinaryExpr) expr()        {}
 func (*CallExpr) expr()          {}
 func (*GetExpr) expr()           {}
@@ -176,6 +184,10 @@ func (*IndexLiteralExpr) expr()  {}
 func (*IndexVariableExpr) expr() {}
 
 func (e *AssignExpr) String() string {
+	return fmt.Sprintf("%s = %s", e.Left, e.Value)
+}
+
+func (e *ArrayAssignExpr) String() string {
 	return fmt.Sprintf("%s = %s", e.Left, e.Value)
 }
 

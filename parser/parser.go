@@ -345,17 +345,28 @@ func (p *Parser) parseAssignment() ast.Expr {
 		index := p.parseExpression()
 		p.expect(token.RightBracket, "Expect ']' after index.")
 
+		oldExpr := expr
+
 		switch index.(type) {
 		case *ast.VariableExpr:
-			return &ast.IndexVariableExpr{
+			expr = &ast.IndexVariableExpr{
 				Name:  index.String(),
 				Left:  expr,
 				Index: index,
 			}
 		case *ast.Literal:
-			return &ast.IndexLiteralExpr{
+			expr = &ast.IndexLiteralExpr{
 				Left:  expr,
 				Index: index,
+			}
+		}
+
+		if p.match(token.Equal) { // 数组赋值
+			val := p.parseAssignment()
+			return &ast.ArrayAssignExpr{
+				Left:  oldExpr.(*ast.VariableExpr),
+				Value: val,
+				Index: expr,
 			}
 		}
 	}

@@ -36,6 +36,8 @@ func Resolve(node ast.Node) {
 		resolveVariableExpr(n)
 	case *ast.AssignExpr:
 		resolveAssignExpr(n)
+	case *ast.ArrayAssignExpr:
+		resolveArrayAssignExpr(n)
 	case *ast.BinaryExpr:
 		resolveBinaryExpr(n)
 	case *ast.UnaryExpr:
@@ -127,6 +129,16 @@ func resolveLocal(expr ast.Expr, name string) {
 		if !exist {
 			errors.Error(token.This, "Cannot use 'this' outside of a class.")
 		}
+	}
+}
+
+func resolveArrayAssignExpr(expr *ast.ArrayAssignExpr) {
+	Resolve(expr.Value)
+	resolveLocal(expr.Left, expr.Left.Name)
+	val, ok := expr.Index.(*ast.IndexVariableExpr)
+	if ok {
+		e := val.Index.(*ast.VariableExpr)
+		resolveLocal(e, e.Name)
 	}
 }
 
