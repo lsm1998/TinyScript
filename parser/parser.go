@@ -345,7 +345,7 @@ func (p *Parser) parseAssignment() ast.Expr {
 		index := p.parseExpression()
 		p.expect(token.RightBracket, "Expect ']' after index.")
 
-		switch expr.(type) {
+		switch index.(type) {
 		case *ast.VariableExpr:
 			return &ast.IndexVariableExpr{
 				Name:  index.String(),

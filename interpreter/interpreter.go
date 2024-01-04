@@ -130,11 +130,27 @@ func Eval(node ast.Node) valuer.Valuer {
 }
 
 func evalIndexVariableExpr(n *ast.IndexVariableExpr) valuer.Valuer {
-	if v, ok := env.Get(n.Name); ok {
-		return v
+	v, ok := env.Get(n.Name)
+	if !ok {
+		errors.Error(token.Identifier, fmt.Sprintf("Undefined variable %s.", n.Name))
 	}
-	errors.Error(token.Identifier, fmt.Sprintf("Undefined variable %s.", n.Name))
-	return nil
+
+	if v.Type() != valuer.NumberType {
+		panic("Index must be number.")
+	}
+
+	left := Eval(n.Left)
+
+	array, ok := left.(*valuer.Array)
+	if !ok {
+		panic("Only array can be indexed.")
+	}
+
+	index := int(v.(*valuer.Number).Value)
+	if index >= len(array.Elements) || index < 0 {
+		panic("Index out of range.")
+	}
+	return array.Elements[index]
 }
 
 func evalIndexLiteralExpr(n *ast.IndexLiteralExpr) valuer.Valuer {
