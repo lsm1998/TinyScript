@@ -25,7 +25,7 @@ func main() {
 		return
 	}
 
-	_, _ = fmt.Fprintln(os.Stdout, "courage programing language.")
+	_, _ = fmt.Fprintln(os.Stdout, "TinyScript programing language.")
 	_, _ = fmt.Fprintln(os.Stdout, "Feel free to type commands.")
 	_, _ = fmt.Fprintln(os.Stdout, "Type \"exit\" to exit.")
 	repl.Start(os.Stdin, os.Stdout)
